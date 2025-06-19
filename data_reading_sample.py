@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 # =============================================================================
 # Creating the list of relevant series
 # =============================================================================
-path = "C:\\Wies Data\\Data for Python"
+path = "path"
 
 # Gather metadata of all series in the given path
 database = create_database(path)
@@ -44,7 +44,6 @@ dcm_list = load_series(series)
 dcm = dcm_list[0]
 
 data = get_rescaled_data(dcm)
-data = np.swapaxes(data, 0, 2)
+data = np.swapaxes(data, 0, 2)  # change coordinates to x,y,z
 
-i = round(np.size(data, axis = 2) / 2)
-plt.imshow(data[:,:,i])
+show_slice(data)
