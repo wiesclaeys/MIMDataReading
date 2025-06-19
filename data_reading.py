@@ -89,4 +89,54 @@ def get_voxsizes(dcm):
     voxvol = voxsizes[0] * voxsizes[1] * voxsizes[2] / 1000     # ml
     
     return voxsizes, voxvol
+
+def show_slice(vol, plane = 'axial', colorbar = True, title = None):
+    """
+    Show an example slice of an image.
+    For axial slices, the hottest slice is chosen, otherwise the central slice is shown.
+
+    Parameters
+    ----------
+    vol : numpy array
+        The volume to show.
+    plane: str
+        The plane to show. Options are 'axial', 'sagittal' or 'coronal', default is 'axial'.
+    colorbar : boolean
+        Whether or not to add a colorbar
+    title : string
+        Title of the image
+
+    Returns
+    -------
+    index : int
+        Index of the displayed slice
+
+    """
+    
+
+    # Plotting
+    if plane == 'sagittal':
+        num_slices = np.size(vol, axis = 0)
+        index = round(num_slices / 2)
+        sl = vol[index,:,:]
+    elif plane == 'coronal':
+        num_slices = np.size(vol, axis = 1)
+        index = round(num_slices / 2)
+        sl = vol[:,index,:]
+    else:
+        counts_per_slice = np.sum(vol, axis = (0,1))
+        index = np.argmax(counts_per_slice)
+        sl = vol[:,:,index]
+    sl = np.swapaxes(sl, 0, 1)  # swapping axes for viewing
+    plt.imshow(sl)
+    
+    # Layout
+    if title == None:
+        title = plane + " slice"
+    if colorbar:
+        plt.colorbar()
+    plt.title(title)
+    plt.show()
+    
+    return index
     
