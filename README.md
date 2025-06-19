@@ -27,5 +27,16 @@ Finally,
 ```
 dcms = load_series(subset)
 ```
-can be used to obtained a list containing dicom objects for each serie in the subset databse.
+can be used to obtained a list containing dicom objects for each serie in the subset database. For NM data, this will be a pydicom dataset, while for PT or CT data, this is a pymirc dataset instead (see https://github.com/gschramm/pymirc)
 A simple example is provided in data_reading_sample.py.
+
+## Extra: general dicom reading tools
+
+```
+get_rescaled_data(dcm)
+```
+Get pixel data from pydicom object and apply MIM (0040,9096) or Siemens (0033,1038) rescaling if needed.
+```
+voxsizes, voxvol = get_voxsizes(dcm)
+```
+Get 3d voxel size and volume.
