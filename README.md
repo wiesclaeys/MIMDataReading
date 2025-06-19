@@ -43,4 +43,4 @@ Get 3d voxel size and volume.
 ```
 show_slice(data, plane = 'axial', colorbar = True, title = None)
 ```
-Quickly show a single refernece slice of the image.
+Quickly show a single reference slice of the image.
