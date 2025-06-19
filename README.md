@@ -27,5 +27,5 @@ Finally,
 ```
 dcms = load_series(subset)
 ```
-can be used to obtained a list containing dicom objects for each serie in the subset databse.
+can be used to obtained a list containing dicom objects for each serie in the subset database. For NM data, this will be a pydicom dataset, while for PT or CT data, this is a pymirc dataset instead (see https://github.com/gschramm/pymirc)
 A simple example is provided in data_reading_sample.py.
