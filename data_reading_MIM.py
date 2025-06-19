@@ -54,7 +54,7 @@ def create_database(path):
         
         for serie in series:
             names.append(serie)
-            files.append(os.path.join(path, folder, serie)
+            files.append(os.path.join(path, folder, serie))
     
     # Process the folder names
     for name in names:
@@ -212,12 +212,12 @@ def load_series(database):
     """
     dcms = []   # will contain the dicom objects
     
-    print("Loading", len(series), "series:")
+    print("Loading", len(database), "series:")
     series_counter = 0  # series ID
-    for i in range(len(series)):
-        print(series_counter, "-", series['series_description'].values[i])
-        modality = series["modality"].values[i]
-        path = series['full_path'].values[i]
+    for i in range(len(database)):
+        print(series_counter, "-", database['series_description'].values[i])
+        modality = database["modality"].values[i]
+        path = database['full_path'].values[i]
         # print(os.path.join(path, '*'))
         if (modality == "CT" or modality == "PT"):  # use pymirc for slice-based dicoms
             dcm = pymirc.fileio.DicomVolume(os.path.join(path, '*'))
