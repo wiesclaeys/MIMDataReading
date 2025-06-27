@@ -40,3 +40,7 @@ Get pixel data from pydicom object and apply MIM (0040,9096) or Siemens (0033,10
 voxsizes, voxvol = get_voxsizes(dcm)
 ```
 Get 3d voxel size and volume.
+```
+show_slice(data, plane = 'axial', colorbar = True, title = None)
+```
+Quickly show a single reference slice of the image.
