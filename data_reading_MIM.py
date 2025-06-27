@@ -150,14 +150,15 @@ def find_series(database, series_description, modality = None, date = None, time
     ----------
     database : pandas dataframe
         Containing the all the series to consider
-    series_description : str
+    series_description : str or list
         (part of) the required series description.
+        If a list, only series satisfying all requirements will be returned.
     modality, date, time, study_description, num_images : str, optional
         The possible search criteria. Default is None.
 
     Returns
     -------
-    series : pandas dataframe
+    subset : pandas dataframe
         The subset of series satisfying all criteria.
         
     """
@@ -174,8 +175,10 @@ def find_series(database, series_description, modality = None, date = None, time
     
     # Finding the series with matching series description
     subset = database
-    series_description = process(series_description)
-    series = subset.loc[subset['series_description'].str.contains(series_description)]   
+    series_description = list(series_description)
+    for description in series_description:
+        description = process(description)
+        subset = subset.loc[subset['series_description'].str.contains(description)]   
     if len(subset) == 0:
         print("No series found with series description containing ", series_description)
         return
@@ -189,9 +192,9 @@ def find_series(database, series_description, modality = None, date = None, time
                 print("No series found with ", tag, val)
                 return
     
-    print(len(series), "series found satisfying the requirements")
+    print(len(subset), "series found satisfying the requirements")
     
-    return series
+    return subset
 
 def load_series(database):
     """
