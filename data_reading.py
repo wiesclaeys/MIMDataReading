@@ -20,7 +20,8 @@ import matplotlib.pyplot as plt
 def get_rescaled_data(dcm):
     """
     Read pixel data and apply rescaling if needed.
-    Includes MIM rescaling, Siemens rescaling
+    Includes MIM rescaling, Siemens rescaling.
+    Converts data to float
     
     Parameters
     ----------
@@ -34,7 +35,8 @@ def get_rescaled_data(dcm):
     
     """
     vol         = dcm.pixel_array 
-
+    vol         = np.array(vol, dtype = float)
+        
     # try to find a rescale factor
     try:
         rescale = dcm.RescaleSlope
@@ -55,6 +57,7 @@ def get_rescaled_data(dcm):
                 rescale = 1
                 intercept = 0
     print("rescale factor = ", rescale)
+    
     # rescale the data
     vol = vol * rescale + intercept
     return vol
