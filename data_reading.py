@@ -11,11 +11,57 @@ This code provides tools to read dicom data into Python
 import os
 
 import pydicom
+import pymirc
 
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
+
+def read_file(path):
+    """
+    Read the dicom file(s) in a given path.
+    Returns the dicom header and pixel data separately
+
+    Parameters
+    ----------
+    path : string
+        Location of the file(s) to be read.
+
+    Returns
+    -------
+    header : pydicom dataset
+        Containing the dicom metadata.
+    data : numpy array
+        The image data.
+
+    """
+    files = os.listdir(path)
+    first_header = pydicom.dcmread(os.path.join(path, files[0]))
+    Modality = first_header.Modality
+    
+    if Modality == 'NM' or Modality == 'OT':
+        if len(files) > 1:  # check for multiple files
+            print("Multiple instances detected: number of files = ", l)
+            datas = []
+            headers = []
+            for i in range(len(files)):
+                headers.append(pydicom.dcmread(os.path.join(path, files[i])))
+                datas.append(get_rescaled_data(os.path.join(path, files[i])))
+            return headers, datas
+        else:
+            header = first_header
+            data = get_rescaled_data(header)
+            if "RECON TOMO" in header.ImageType:    # rearrange axis if reconstructed image
+                print("--- swapping axis 0 and 2")
+                data = np.swapaxes(data, 0, 2)  # change coordinates to x,y,z
+    
+    if Modality == 'PT':    # use pymirc to get pixel data
+        header = first_header
+        DicomVolume = pymirc.fileio.DicomVolume(os.path.join(path, '*'))
+        data = DicomVolume.get_data()
+    
+    return header, data
 
 def get_rescaled_data(dcm):
     """
@@ -34,34 +80,37 @@ def get_rescaled_data(dcm):
         Containing the rescaled pixel data.
     
     """
+    
     vol         = dcm.pixel_array 
     vol         = np.array(vol, dtype = float)
         
     # try to find a rescale factor
     try:
         rescale = dcm.RescaleSlope
-        intercept = dcm.RescaleIntercept
-        
+        try:
+            intercept = dcm.RescaleIntercept
+        except:
+            intercept = 0
     except:
         try:
             # Siemens rescale
             rescale = 1 / dcm[0x0033,0x1038].value
             intercept = 0
-            
+            print("2")
         except:    
-            try:    # MIM rescale
-                field = dcm[0x0040,0x9096][0]
-                rescale = 1/field[0x0040,0x9225].value
+            try:    # normal rescale (https://dicom.innolitics.com/ciods/nuclear-medicine-image/general-image/00409096)
+                field = dcm[0x0040,0x9096][-1]
+                rescale = field[0x0040,0x9225].value
                 intercept = 0
             except:
                 rescale = 1
                 intercept = 0
+    
     print("rescale factor = ", rescale)
     
     # rescale the data
     vol = vol * rescale + intercept
     return vol
-
 
 def get_voxsizes(dcm):
     """
@@ -84,7 +133,11 @@ def get_voxsizes(dcm):
     # reading some metadata
     voxsize_x = dcm.PixelSpacing[0]
     voxsize_y = dcm.PixelSpacing[1]
-    voxsize_z = abs(dcm.SpacingBetweenSlices)
+    
+    try:
+        voxsize_z = abs(dcm.SpacingBetweenSlices)
+    except:
+        voxsize_z = abs(dcm.SliceThickness)
     
     if (voxsize_x != voxsize_y) or (voxsize_y != voxsize_z):
         print("! Warning: the voxel size is not isotropic !")

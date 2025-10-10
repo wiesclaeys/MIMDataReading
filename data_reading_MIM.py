@@ -196,6 +196,33 @@ def find_series(database, series_description, modality = None, date = None, time
     
     return subset
 
+def get_file_list(database, verbose = True):
+    """
+    Return the list of paths for a given database
+
+    Parameters
+    ----------
+    database : pandas dataframe
+        Containing the series of interest.
+    verbose : boolean, optional
+        Whether to print verbose output. The default is True.
+
+    Returns
+    -------
+    file_list : array of string
+        The paths for each file.
+
+    """
+    file_list = database['full_path'].values   
+    
+    if verbose:
+        print("Generating file list containing", len(database), "series:")
+        for i in range(len(database)):
+            # modality = database["modality"].values[i]
+            print(i, "-", database['series_description'].values[i])
+        
+    return file_list
+
 def load_series(database):
     """
     Return a list containing the DICOM file for each series in a database
