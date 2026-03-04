@@ -7,10 +7,14 @@ Created on Tue Nov  5 12:10:49 2024
 Sample code to show the functionality of the functions in data_reading
 """
 
-from data_reading import *
+
 from data_reading_MIM import *
+from data_reading_general import *
 
 import matplotlib.pyplot as plt
+
+
+
 
 # =============================================================================
 # Creating the list of relevant series
@@ -33,17 +37,38 @@ series_description = ""
 date = "yyyy-mm-dd"
 
 series = find_series(patient, series_description, date= date)
+
+# Load all series from series list
+# Option 1: create list of PyDicom objects --> for NM only
 dcm_list = load_series(series)
+# Option 2: create list of paths --> for NM and PT
+file_list = get_file_list(series)
 
 
 #%% ===========================================================================
-# Loading an NM series and showing the central slice
+# Loading an NM series and showing the central slice (option 1)
 # =============================================================================
 
+# read first dcm from dcm list
+dcm = dcm_list[0]   # this is a Pydicom object
 
-dcm = dcm_list[0]
-
-data = get_rescaled_data(dcm)
+# get pixel data
+data = get_rescaled_data(dcm)   # rescale data
 data = np.swapaxes(data, 0, 2)  # change coordinates to x,y,z
 
+# show central slice
+show_slice(data)
+
+
+#%% ===========================================================================
+# Loading an NM/PT series and showing the central slice (option 2)
+# =============================================================================
+
+# read first path from file list
+file = file_list[0] # this is the path to the image
+
+# get dicom header and (rescaled) pixel data separately
+dcm, data = read_file(file, verbose = True)     # uses pymirc functionality to convert multiple slices to a single pixel array
+
+# show central slice
 show_slice(data)

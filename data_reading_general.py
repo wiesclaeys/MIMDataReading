@@ -5,7 +5,7 @@ Created on Tue Oct 15 11:08:37 2024
 @author: wclaey6
 
 
-This code provides tools to read dicom data into Python
+This code provides general tools to read dicom data into Python
 """
 
 import os
@@ -18,15 +18,19 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 
-def read_file(path):
+def read_file(path, verbose = False):
     """
     Read the dicom file(s) in a given path.
     Returns the dicom header and pixel data separately
+    Uses Pymirc (https://pypi.org/project/pymirc/) to handle images consisting of one file per slice (e.g. PT)
+    
 
     Parameters
     ----------
     path : string
         Location of the file(s) to be read.
+    verbose : bool, optional
+        Whether to print accession number and series description of the loaded series. Default: False
 
     Returns
     -------
@@ -39,6 +43,12 @@ def read_file(path):
     files = os.listdir(path)
     first_header = pydicom.dcmread(os.path.join(path, files[0]))
     Modality = first_header.Modality
+    
+    # print accession number and series description
+    if verbose:
+        print("Loading series with: ")
+        print(" -- accession number: ", first_header.AccessionNumber)
+        print(" -- series description: ", first_header.SeriesDescription)
     
     if Modality == 'NM' or Modality == 'OT':
         if len(files) > 1:  # check for multiple files
@@ -60,6 +70,7 @@ def read_file(path):
         header = first_header
         DicomVolume = pymirc.fileio.DicomVolume(os.path.join(path, '*'))
         data = DicomVolume.get_data()
+
     
     return header, data
 
