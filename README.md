@@ -23,12 +23,25 @@ A further selection of series can be made using
 subset = find_series(database, series_description, tags)
 ```
 where the possible tags are modality, date, time, study_description, num_images.
-Finally, 
+To read all files in a given database, there are two options. For NM and other modalities where each image consists of only one file, a list of Pydicom objects can be generate using 
 ```
 dcms = load_series(subset)
 ```
-can be used to obtained a list containing dicom objects for each serie in the subset database. For NM data, this will be a pydicom dataset, while for PT or CT data, this is a pymirc dataset instead (see https://github.com/gschramm/pymirc)
-A simple example is provided in data_reading_sample.py.
+
+For PT and other modalities where each image consists of different files per slice, a different approach has to be used, as Pydicom cannot read multiple files at ones. Instead, a list of paths objects can be generate using:
+```
+file_list = get_file_list(series)
+```
+The file(s) at a single path can be read using
+```
+dcm, data = read_file(file, verbose = True)
+```
+For NM images, this function is equivalent to
+```
+dcm = pydicom.dcmread(file)
+data = get_rescaled_data(dcm.pixel_array)
+```
+For PT images, Pymirc (see https://github.com/gschramm/pymirc) is used to return a pixel array containing the data from all slice files, and dcm is the header of the first dicom slice.
 
 ## Extra: general dicom reading tools
 
