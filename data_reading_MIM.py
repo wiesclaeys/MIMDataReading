@@ -183,12 +183,14 @@ def find_series(database, series_description, series_description_excl = None, mo
     for description in series_description:
         description = process(description)
         subset = subset.loc[subset['series_description'].str.contains(description)]   
-    for description in series_description_excl:
-        description = process(description)
-        subset = subset.loc[~ subset['series_description'].str.contains(description)]   
+    if series_description_excl is not None:
+        for description in series_description_excl:
+            description = process(description)
+            subset = subset.loc[~ subset['series_description'].str.contains(description)]   
     if len(subset) == 0:
         print("No series found with series description containing ", series_description)
         return
+    print(tags)
     
     # Finding the series matching the optional search criteria
     for tag in tags:
