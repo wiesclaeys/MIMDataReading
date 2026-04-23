@@ -142,7 +142,7 @@ def lookup_patient(database, patient_name, patient_ID = None):
     print(len(subset), "series found corresponding to this patient")
     return subset
 
-def find_series(database, series_description, modality = None, date = None, time = None, study_description = None, num_images = None):
+def find_series(database, series_description, series_description_excl = None, modality = None, date = None, time = None, study_description = None, num_images = None):
     """
     Look up the subset of series satisfying certain criteria
 
@@ -153,6 +153,8 @@ def find_series(database, series_description, modality = None, date = None, time
     series_description : str or list
         (part of) the required series description.
         If a list, only series satisfying all requirements will be returned.
+    series_description_excl : str or list, optional
+        series description inclusions
     modality, date, time, study_description, num_images : str, optional
         The possible search criteria. Default is None.
 
@@ -168,7 +170,9 @@ def find_series(database, series_description, modality = None, date = None, time
     
     # Printing
     print("Selecting all series with: ")
-    print('- series description containing "', series_description, '"')
+    print('- series description containing ', series_description)
+    if series_description_excl is not None:
+        print('- series description NOT containing ', series_description_excl)
     for tag in tags:
         if tags[tag] is not None:
             print("-", tag, "=" , tags[tag])
@@ -179,6 +183,9 @@ def find_series(database, series_description, modality = None, date = None, time
     for description in series_description:
         description = process(description)
         subset = subset.loc[subset['series_description'].str.contains(description)]   
+    for description in series_description_excl:
+        description = process(description)
+        subset = subset.loc[~ subset['series_description'].str.contains(description)]   
     if len(subset) == 0:
         print("No series found with series description containing ", series_description)
         return
@@ -265,6 +272,35 @@ def load_series(database):
         series_counter += 1
         
     return dcms
+
+def select_accession_number(file_list, accession_number):
+    """
+    Select all files in file list with accession number containing a given string
+    Need to read all files, since accession number is not contained in the file names
+
+    Parameters
+    ----------
+    file_list : array of string
+        The paths of the initial files.
+    accession_number : string
+        (Part of) the accession number to select for.
+
+    Returns
+    -------
+    new_file_list : array of string
+        The paths of the selected files.
+
+    """
+    new_file_list = []
+    
+    for path in file_list:
+        files = os.listdir(path)
+        dcm = pydicom.dcmread(os.path.join(path, files[0]))
+        if accession_number in dcm.AccessionNumber:
+            new_file_list.append(path)
+    new_file_list = np.array(new_file_list)
+    
+    return new_file_list
     
 # =============================================================================
 # AUXILIARY FUNCTIONS
