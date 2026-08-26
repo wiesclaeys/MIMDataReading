@@ -158,6 +158,7 @@ def get_voxsizes(dcm):
     
     return voxsizes, voxvol
 
+
 def show_slice(vol, plane = 'axial', colorbar = True, title = None):
     """
     Show an example slice of an image.
